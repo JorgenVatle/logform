@@ -57,7 +57,7 @@ export namespace format {
   function cli(opts?: CliOptions): Format;
   function colorize(opts?: ColorizeOptions): Colorizer;
   function combine(...formats: Format[]): Format;
-  function errors(opts?: object): Format;
+  function errors(opts?: ErrorOptions): Format;
   function json(opts?: JsonOptions): Format;
   function label(opts?: LabelOptions): Format;
   function logstash(): Format;
@@ -213,4 +213,16 @@ export interface UncolorizeOptions {
    * Disables the uncolorize format for `info[MESSAGE]` if set to `false`.
    */
   raw?: boolean;
+}
+
+export interface ErrorOptions {
+  /**
+   * Whether we should store the error stack trace on the logger info object.
+   */
+  stack?: boolean;
+  
+  /**
+   * Whether the error's 'cause' property should be included in the logger's info object.
+   */
+  cause?: boolean;
 }
