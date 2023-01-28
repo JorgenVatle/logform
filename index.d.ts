@@ -2,24 +2,53 @@
 // Project: https://github.com/winstonjs/logform
 // Definitions by: DABH <https://github.com/DABH>
 // Definitions: https://github.com/winstonjs/logform
-// TypeScript Version: 2.2
+// TypeScript Version: 4.9
 
-export interface TransformableInfo {
-  level: string;
-  message: any;
-  [key: string]: any;
+
+type TransformableInfo<
+    Meta extends object = object
+> = {
+ level: string;
+ message: any;
+ [key: string]: any;
+} & Meta;
+
+type TransformOpts = object | undefined;
+type TransformResult = TransformableInfo | boolean;
+
+export class Format<
+    Opts extends TransformOpts = TransformOpts,
+    InputInfo extends TransformableInfo = TransformableInfo,
+    OutputInfo extends TransformResult = TransformResult
+> {
+  constructor(opts: Opts);
+  
+  options: Opts;
+  transform: TransformFunction<Opts, InputInfo, OutputInfo>;
 }
 
-export type TransformFunction = (info: TransformableInfo, opts?: any) => TransformableInfo | boolean;
+export type TransformFunction<
+    Opts extends TransformOpts = TransformOpts,
+    InputInfo extends TransformableInfo = TransformableInfo,
+    OutputInfo extends TransformResult = TransformResult,
+> = (info: InputInfo, opts: Opts) => OutputInfo;
+
+type FormatWrap<
+    Opts extends TransformOpts,
+    InputInfo extends TransformableInfo,
+    OutputInfo extends TransformResult,
+> = (opts: Opts) => Format<Opts, InputInfo, OutputInfo>
+
+export function format<
+    Opts extends TransformOpts = TransformOpts,
+    InputInfo extends TransformableInfo = TransformableInfo,
+    OutputInfo extends TransformResult = TransformResult,
+>(
+    transform: TransformFunction<Opts, InputInfo, OutputInfo>
+): FormatWrap<Opts, InputInfo, OutputInfo>;
+
+
 export type Colors = { [key: string]: string | string[] }; // tslint:disable-line interface-over-type-literal
-export type FormatWrap = (opts?: any) => Format;
-
-export class Format {
-  constructor(opts?: object);
-
-  options?: object;
-  transform: TransformFunction;
-}
 
 export class Colorizer extends Format {
   constructor(opts?: object);
@@ -28,8 +57,6 @@ export class Colorizer extends Format {
   addColors: (colors: Colors) => Colors;
   colorize: (level: string, message: string) => string;
 }
-
-export function format(transform: TransformFunction): FormatWrap;
 
 export function levels(config: object): object;
 
