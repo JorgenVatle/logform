@@ -13,40 +13,32 @@ type TransformableInfo<
  [key: string]: any;
 } & Meta;
 
-type TransformOpts = object | undefined;
 type TransformResult = TransformableInfo | boolean;
 
-export class Format<
-    Opts extends TransformOpts = TransformOpts,
-    InputInfo extends TransformableInfo = TransformableInfo,
-    OutputInfo extends TransformResult = TransformResult
-> {
-  constructor(opts: Opts);
+export class Format<Transform extends TransformFunction = TransformFunction> {
+  constructor(opts: TransformOptions<Transform>);
   
-  options: Opts;
-  transform: TransformFunction<Opts, InputInfo, OutputInfo>;
+  options: TransformOptions<Transform>;
+  transform: Transform;
 }
 
 export type TransformFunction<
-    Opts extends TransformOpts = TransformOpts,
+    Opts = any,
     InputInfo extends TransformableInfo = TransformableInfo,
     OutputInfo extends TransformResult = TransformResult,
 > = (info: InputInfo, opts: Opts) => OutputInfo;
 
-type FormatWrap<
-    Opts extends TransformOpts,
-    InputInfo extends TransformableInfo,
-    OutputInfo extends TransformResult,
-> = (opts: Opts) => Format<Opts, InputInfo, OutputInfo>
+type TransformOptions<
+    Transform extends TransformFunction
+> = Transform extends TransformFunction<infer Options, any, any>
+    ? Options extends object
+      ? [Options]
+      : [Options] | []
+    : never;
 
 export function format<
-    Opts extends TransformOpts = TransformOpts,
-    InputInfo extends TransformableInfo = TransformableInfo,
-    OutputInfo extends TransformResult = TransformResult,
->(
-    transform: TransformFunction<Opts, InputInfo, OutputInfo>
-): FormatWrap<Opts, InputInfo, OutputInfo>;
-
+    Transform extends TransformFunction,
+>(transform: Transform): (...opts: TransformOptions<Transform>) => Format<Transform>;
 
 export type Colors = { [key: string]: string | string[] }; // tslint:disable-line interface-over-type-literal
 
